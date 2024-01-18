@@ -2,12 +2,16 @@ package com.example.spring_crud.controllers;
 
 import com.example.spring_crud.entities.Product;
 import com.example.spring_crud.services.ProductService;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -31,12 +35,21 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> create(@RequestBody Product product){
+    public ResponseEntity<?> create(@Valid @RequestBody Product product, BindingResult result){
+
+        if (result.hasFieldErrors()) {
+            return validation(result);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.save(product));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Product product){
+    public ResponseEntity<?> update(@PathVariable Long id, @Valid @RequestBody Product product, BindingResult result){
+
+        if (result.hasFieldErrors()) {
+            return validation(result);
+        }
+
         Optional <Product> productOptional = productService.update(id, product);
         if(productOptional.isPresent()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(productOptional.orElseThrow());
@@ -45,11 +58,20 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Product> delete(@PathVariable Long id){
+    public ResponseEntity<?> delete(@PathVariable Long id){
         Optional<Product> productOptional = productService.delete(id);
         if(productOptional.isPresent()){
             return ResponseEntity.ok(productOptional.orElseThrow());
         }
         return ResponseEntity.notFound().build();
+    }
+
+    private ResponseEntity<?> validation(BindingResult result) {
+        Map<String, String> errors = new HashMap<>();
+
+        result.getFieldErrors().forEach(err ->
+            errors.put(err.getField(), "El campo " + err.getField() + " " + err.getDefaultMessage());
+        );
+        return ResponseEntity.badRequest().body(errors);
     }
 }
