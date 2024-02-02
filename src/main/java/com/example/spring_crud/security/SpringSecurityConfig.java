@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package com.example.spring_crud.security;
 
 import org.springframework.context.annotation.Bean;
@@ -28,3 +29,53 @@ public class SpringSecurityConfig {
                 .build();
     }
 }
+||||||| parent of e1766a6 (Creación de la configuración de seguridad añadiendo el filtro de autorización del login y generación del token)
+=======
+package com.example.spring_crud.security;
+
+import com.example.spring_crud.security.filter.JwtAuthenticationFilter;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SpringSecurityConfig {
+
+    @Autowired
+    private AuthenticationConfiguration authenticationConfiguration;
+
+    @Bean
+    AuthenticationManager authenticationManager() throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder(){
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        return http.authorizeHttpRequests(auth -> auth
+                .requestMatchers(HttpMethod.GET, "/api/users").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/users/register").permitAll()
+                        .anyRequest().authenticated())
+                .addFilter(new JwtAuthenticationFilter(authenticationManager()))
+                .csrf(config -> config.disable())
+                .sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
+
+    }
+
+}
+>>>>>>> e1766a6 (Creación de la configuración de seguridad añadiendo el filtro de autorización del login y generación del token)
