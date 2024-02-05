@@ -2,7 +2,6 @@
 
 package com.example.spring_crud.controllers;
 
-import com.example.spring_crud.entities.Product;
 import com.example.spring_crud.entities.User;
 import com.example.spring_crud.services.UserService;
 import jakarta.validation.Valid;
@@ -48,9 +47,7 @@ public class UserController {
     private ResponseEntity<?> validation(BindingResult result) {
         Map<String, String> errors = new HashMap<>();
 
-        result.getFieldErrors().forEach(err -> {
-            errors.put(err.getField(), "El campo "+ err.getField()+ " "+ err.getDefaultMessage()) ;
-        });
+        result.getFieldErrors().forEach(err -> errors.put(err.getField(), "El campo "+ err.getField()+ " "+ err.getDefaultMessage()));
         return ResponseEntity.badRequest().body(errors);
     }
 }
